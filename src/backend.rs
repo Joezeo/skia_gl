@@ -12,13 +12,15 @@ use skia_safe::{
 use std::{
     ffi::CString,
     num::NonZeroU32,
-    sync::{
-        mpsc::{channel, Receiver, Sender},
-        Arc, Mutex,
-    },
-    thread,
+    sync::{Arc, Mutex},
 };
 use winit::window::Window;
+
+#[cfg(feature = "independent_ui")]
+use std::{
+    sync::mpsc::{channel, Receiver, Sender},
+    thread,
+};
 
 use crate::{renderer, SkiaSurface};
 

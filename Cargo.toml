@@ -14,5 +14,5 @@ skia-safe = { version = "0.57.0", features = ["gl", "textlayout"] }
 gl = "0.14.0"
 
 [features]
-default = []
+default = ["independent_ui"]
 independent_ui = []
