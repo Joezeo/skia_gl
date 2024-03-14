@@ -327,6 +327,11 @@ fn triangle(
         }
         alpha += delta;
     }
+    // path.move_to((100.00123, 100.23));
+    // path.line_to((100.84213, 400.231));
+    // path.line_to((400.993218321, 400.321301));
+    // path.line_to((100.00123, 100.23));
+
     path.close();
     canvas.draw_path(&path, &paint);
 }

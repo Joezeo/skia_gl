@@ -3,7 +3,7 @@ use glutin::{
     config::{Config, GlConfig},
     context::{NotCurrentContext, NotCurrentGlContext, PossiblyCurrentContext},
     display::{GetGlDisplay, GlDisplay},
-    surface::{GlSurface, Surface, WindowSurface},
+    surface::{GlSurface, Surface, SwapInterval, WindowSurface},
 };
 use skia_safe::{
     gpu::{gl::FramebufferInfo, BackendRenderTarget, DirectContext, SurfaceOrigin},
@@ -64,6 +64,20 @@ impl GlEnv {
             gl_surface,
             gl_ctx: Mutex::new(gl_ctx),
             gl_config,
+        }
+    }
+
+    #[inline]
+    pub fn set_vsync(&self) {
+        if let Err(res) = self.gl_surface.set_swap_interval(
+            self.gl_ctx
+                .lock()
+                .unwrap()
+                .possibly_current_context()
+                .unwrap(),
+            SwapInterval::Wait(NonZeroU32::new(1).unwrap()),
+        ) {
+            eprintln!("Error setting vsync: {res:?}");
         }
     }
 
@@ -285,14 +299,15 @@ pub enum Message {
 #[cfg(feature = "independent_ui")]
 pub fn ui_runtime(mut size: (i32, i32), receiver: Receiver<Message>, gl_env: Arc<GlEnv>) {
     use std::time::{Duration, Instant};
-    let mut resized = false;
 
     gl_env.make_current();
     gl_env.load();
+    gl_env.set_vsync();
 
     let mut skia_env = create_skia_env(size, &gl_env.gl_config);
 
     let mut frame = 0usize;
+    let mut resized = false;
 
     let mut previous_frame_start = Instant::now();
 
@@ -319,12 +334,16 @@ pub fn ui_runtime(mut size: (i32, i32), receiver: Receiver<Message>, gl_env: Arc
 
             let canvas = skia_env.canvas();
             canvas.clear(Color::WHITE);
-            renderer::render_frame(frame % 360, 12, 60, canvas);
-            skia_env.gr_context.flush_and_submit();
-            gl_env.swap_buffers();
-            previous_frame_start = frame_start;
 
+            renderer::render_frame(frame % 360, 12, 60, canvas);
+            // std::thread::sleep(std::time::Duration::from_secs(1));
+
+            skia_env.surface.flush_and_submit();
+            gl_env.swap_buffers();
+
+            previous_frame_start = frame_start;
             frame += 1;
+            resized = false;
         }
     }
 }
