@@ -335,8 +335,19 @@ pub fn ui_runtime(mut size: (i32, i32), receiver: Receiver<Message>, gl_env: Arc
             let canvas = skia_env.canvas();
             canvas.clear(Color::WHITE);
 
+            // use skia_safe::{ClipOp, Paint, Rect};
+            // canvas.save();
+            // let rect = Rect::new(100., 100., 200., 200.);
+            // canvas.clip_rect(rect, ClipOp::Difference, false);
+
+            // let rect = Rect::new(0., 0., size.0 as f32, size.1 as f32);
+            // let mut paint = Paint::default();
+            // paint.set_color(Color::GRAY);
+            // canvas.draw_rect(rect, &paint);
+            // canvas.restore();
+
             renderer::render_frame(frame % 360, 12, 60, canvas);
-            // std::thread::sleep(std::time::Duration::from_secs(1));
+            // std::thread::sleep(std::time::Duration::from_millis(100));
 
             skia_env.surface.flush_and_submit();
             gl_env.swap_buffers();
