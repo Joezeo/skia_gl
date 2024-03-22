@@ -224,7 +224,9 @@ impl Backend {
         {
             let canvas = self.skia_env.canvas();
             canvas.clear(Color::WHITE);
+
             renderer::render_frame(frame % 360, 12, 60, canvas);
+
             self.skia_env.gr_context.flush_and_submit();
             self.gl_env.swap_buffers();
         }
@@ -298,7 +300,10 @@ pub enum Message {
 
 #[cfg(feature = "independent_ui")]
 pub fn ui_runtime(mut size: (i32, i32), receiver: Receiver<Message>, gl_env: Arc<GlEnv>) {
-    use std::time::{Duration, Instant};
+    use std::{
+        sync::atomic::AtomicUsize,
+        time::{Duration, Instant},
+    };
 
     gl_env.make_current();
     gl_env.load();
@@ -319,6 +324,19 @@ pub fn ui_runtime(mut size: (i32, i32), receiver: Receiver<Message>, gl_env: Arc
                 Message::Resize(width, height) => {
                     size = (width as i32, height as i32);
                     resized = true;
+
+                    // use std::io::Write;
+                    // static COUNTER: AtomicUsize = AtomicUsize::new(0);
+                    // let snapshot = skia_env.surface.image_snapshot();
+                    // let data = snapshot
+                    //     .encode_to_data(skia_safe::EncodedImageFormat::PNG)
+                    //     .unwrap();
+                    // let mut file = std::fs::File::create(format!(
+                    //     "snapshot-{}.png",
+                    //     COUNTER.fetch_add(1, std::sync::atomic::Ordering::Release)
+                    // ))
+                    // .unwrap();
+                    // file.write_all(data.as_bytes()).unwrap();
                 }
             }
         }
